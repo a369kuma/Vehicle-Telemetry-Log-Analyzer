@@ -38,6 +38,21 @@ class TelemetryAnalyzerTest(unittest.TestCase):
         self.assertIn("invalid JSON", summary.validation_issues[-1].message)
         self.assertFalse(summary.anomalies)
 
+    def test_analyzer_flags_non_increasing_timestamps_per_session_vehicle(self) -> None:
+        lines = [
+            '{"session_id":"S-1","timestamp":"2026-07-13T12:00:02Z","vehicle_id":"VH-1","signal":"engine_rpm","value":900}',
+            '{"session_id":"S-1","timestamp":"2026-07-13T12:00:01Z","vehicle_id":"VH-1","signal":"engine_rpm","value":850}',
+            '{"session_id":"S-1","timestamp":"2026-07-13T12:00:01Z","vehicle_id":"VH-2","signal":"engine_rpm","value":850}',
+        ]
+
+        analyzer = TelemetryAnalyzer(DEFAULT_SIGNAL_RANGES, DEFAULT_TRANSITION_RULES)
+        summary = analyzer.analyze(parse_jsonl(lines))
+
+        self.assertEqual(summary.records_seen, 3)
+        self.assertEqual(summary.valid_records, 3)
+        self.assertEqual(len(summary.anomalies), 1)
+        self.assertIn("non-increasing timestamp", summary.anomalies[0].message)
+
 
 if __name__ == "__main__":
     unittest.main()

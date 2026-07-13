@@ -1,7 +1,7 @@
 from __future__ import annotations
 
-from collections import defaultdict
 from dataclasses import dataclass, field
+from datetime import datetime
 from typing import Iterable
 
 from telemetry_analyzer.models import TelemetryRecord
@@ -42,7 +42,7 @@ class TelemetryAnalyzer:
     def analyze(self, records: Iterable[TelemetryRecord]) -> AnalysisSummary:
         summary = AnalysisSummary()
         last_values: dict[tuple[str, str, str], object] = {}
-        seen_timestamps: dict[tuple[str, str], list[str]] = defaultdict(list)
+        last_timestamps: dict[tuple[str, str], datetime] = {}
 
         for record in records:
             summary.records_seen += 1
@@ -53,7 +53,7 @@ class TelemetryAnalyzer:
 
             self._check_signal_range(record, summary)
             self._check_transition(record, last_values, summary)
-            seen_timestamps[(record.session_id, record.vehicle_id)].append(record.timestamp)
+            self._check_timestamp_order(record, last_timestamps, summary)
 
         return summary
 
@@ -98,3 +98,33 @@ class TelemetryAnalyzer:
                     message=f"invalid {record.signal} transition {previous!r} -> {record.value!r}",
                 )
             )
+
+    def _check_timestamp_order(
+        self,
+        record: TelemetryRecord,
+        last_timestamps: dict[tuple[str, str], datetime],
+        summary: AnalysisSummary,
+    ) -> None:
+        key = (record.session_id, record.vehicle_id)
+        current = _parse_utc_timestamp(record.timestamp)
+        previous = last_timestamps.get(key)
+        last_timestamps[key] = current
+
+        if previous is None:
+            return
+
+        if current <= previous:
+            summary.anomalies.append(
+                SignalAnomaly(
+                    line_number=record.line_number,
+                    session_id=record.session_id,
+                    vehicle_id=record.vehicle_id,
+                    signal=record.signal,
+                    value=record.value,
+                    message=f"non-increasing timestamp {record.timestamp}",
+                )
+            )
+
+
+def _parse_utc_timestamp(timestamp: str) -> datetime:
+    return datetime.fromisoformat(timestamp.removesuffix("Z") + "+00:00")

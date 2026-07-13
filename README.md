@@ -27,6 +27,19 @@ Analyze a log file:
 telemetry-analyzer examples/sample_telemetry.jsonl
 ```
 
+Run the standard local checks:
+
+```bash
+./scripts/run_checks.sh
+```
+
+Build and run the C++ validator directly:
+
+```bash
+make cpp-validator
+./build/telemetry_validator examples/sample_telemetry.jsonl
+```
+
 ## Log format
 
 Each line is a JSON object:

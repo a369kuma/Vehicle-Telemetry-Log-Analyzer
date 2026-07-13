@@ -1,0 +1,3 @@
+{"session_id":"S-100","timestamp":"2026-07-13T12:00:00Z","vehicle_id":"VH-42","signal":"gear_state","value":"PARK"}
+{"session_id":"S-100","timestamp":"2026-07-13T12:00:01Z","vehicle_id":"VH-42","signal":"gear_state","value":"DRIVE"}
+{"session_id":"S-100","timestamp":"2026-07-13T12:00:02Z","vehicle_id":"VH-42","signal":"battery_voltage","value":18.2}

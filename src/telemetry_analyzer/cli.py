@@ -4,6 +4,7 @@ import argparse
 import json
 from pathlib import Path
 
+from telemetry_analyzer.api import summary_to_dict
 from telemetry_analyzer.analyzer import TelemetryAnalyzer
 from telemetry_analyzer.parser import parse_jsonl
 from telemetry_analyzer.rules import DEFAULT_SIGNAL_RANGES, DEFAULT_TRANSITION_RULES
@@ -23,12 +24,7 @@ def main() -> int:
 
     print(
         json.dumps(
-            {
-                "records_seen": summary.records_seen,
-                "valid_records": summary.valid_records,
-                "validation_issues": [issue.__dict__ for issue in summary.validation_issues],
-                "anomalies": [anomaly.__dict__ for anomaly in summary.anomalies],
-            },
+            summary_to_dict(summary),
             indent=2,
             sort_keys=True,
         )

@@ -66,6 +66,68 @@ Run the full local check suite any time:
 ./scripts/run_checks.sh
 ```
 
+## Edit The Bounds
+
+The analyzer's signal bounds and state-transition limits are user-editable. Start
+from the checked-in default rules:
+
+```bash
+cp config/default_rules.json config/my_rules.json
+```
+
+Then edit the values that match your test environment. For example, this raises
+the acceptable upper bound for `battery_voltage` from `16.0` to `20.0`:
+
+```json
+{
+  "signal_ranges": {
+    "battery_voltage": {
+      "minimum": 9.0,
+      "maximum": 20.0
+    }
+  }
+}
+```
+
+Run the CLI with your custom rules:
+
+```bash
+telemetry-analyzer --rules config/my_rules.json examples/sample_telemetry.jsonl
+```
+
+You can also edit transition limits. This example allows a direct `PARK -> DRIVE`
+transition for test rigs where that jump is expected:
+
+```json
+{
+  "transition_rules": {
+    "gear_state": {
+      "PARK": ["PARK", "DRIVE", "REVERSE", "NEUTRAL"],
+      "DRIVE": ["DRIVE", "NEUTRAL"]
+    }
+  }
+}
+```
+
+Custom rule files are partial overrides. Any signal range or transition rule you
+do not include falls back to the built-in defaults.
+
+## Edit Rules Over The API
+
+Send a `rules` object with the request when one analysis needs custom bounds:
+
+```bash
+curl -X POST http://localhost:8080/analyze \
+  -H "Content-Type: application/json" \
+  -d '{"log":"{\"session_id\":\"S-100\",\"timestamp\":\"2026-07-13T12:00:00Z\",\"vehicle_id\":\"VH-42\",\"signal\":\"battery_voltage\",\"value\":18.2}","rules":{"signal_ranges":{"battery_voltage":{"minimum":9.0,"maximum":20.0}}}}'
+```
+
+Or start the API with a default rules file:
+
+```bash
+python -m telemetry_analyzer.api --rules config/my_rules.json
+```
+
 ## C++ Validator
 
 Build and run the dependency-free validator directly:
@@ -120,4 +182,4 @@ Required fields:
 
 - The REST API returns analysis results but does not yet persist records or anomalies to PostgreSQL.
 - The C++ validator intentionally supports flat telemetry JSON objects and rejects nested JSON values.
-- Signal ranges and transition rules are currently compiled into the application instead of loaded from external configuration.
+- Python CLI/API signal ranges and transition rules are editable through JSON rules; the C++ validator still uses compiled-in rules.

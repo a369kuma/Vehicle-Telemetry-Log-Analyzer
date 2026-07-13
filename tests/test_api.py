@@ -53,6 +53,47 @@ class TelemetryApiTest(unittest.TestCase):
         self.assertEqual(payload["records_seen"], 1)
         self.assertEqual(len(payload["anomalies"]), 1)
 
+    def test_analyze_endpoint_accepts_custom_rules(self) -> None:
+        status, payload = self._request(
+            "POST",
+            "/analyze",
+            {
+                "log": '{"session_id":"S-10","timestamp":"2026-07-13T12:00:00Z","vehicle_id":"VH-10","signal":"battery_voltage","value":18.5}',
+                "rules": {
+                    "signal_ranges": {
+                        "battery_voltage": {
+                            "minimum": 9.0,
+                            "maximum": 20.0,
+                        }
+                    }
+                },
+            },
+        )
+
+        self.assertEqual(status, 200)
+        self.assertEqual(payload["records_seen"], 1)
+        self.assertEqual(payload["anomalies"], [])
+
+    def test_analyze_endpoint_rejects_invalid_rules(self) -> None:
+        status, payload = self._request(
+            "POST",
+            "/analyze",
+            {
+                "log": "",
+                "rules": {
+                    "signal_ranges": {
+                        "battery_voltage": {
+                            "minimum": 20.0,
+                            "maximum": 10.0,
+                        }
+                    }
+                },
+            },
+        )
+
+        self.assertEqual(status, 400)
+        self.assertIn("minimum cannot exceed maximum", payload["error"])
+
     def test_analyze_endpoint_rejects_invalid_body(self) -> None:
         status, payload = self._request("POST", "/analyze", {"log": ["not", "text"]})
 

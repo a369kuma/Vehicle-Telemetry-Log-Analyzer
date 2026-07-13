@@ -1,0 +1,30 @@
+{
+  "signal_ranges": {
+    "battery_voltage": {
+      "minimum": 9.0,
+      "maximum": 16.0
+    },
+    "engine_rpm": {
+      "minimum": 0.0,
+      "maximum": 8000.0
+    },
+    "vehicle_speed": {
+      "minimum": 0.0,
+      "maximum": 260.0
+    }
+  },
+  "transition_rules": {
+    "gear_state": {
+      "PARK": ["PARK", "REVERSE", "NEUTRAL"],
+      "REVERSE": ["REVERSE", "NEUTRAL", "PARK"],
+      "NEUTRAL": ["NEUTRAL", "DRIVE", "REVERSE", "PARK"],
+      "DRIVE": ["DRIVE", "NEUTRAL"]
+    },
+    "ignition_state": {
+      "OFF": ["OFF", "ACCESSORY"],
+      "ACCESSORY": ["ACCESSORY", "ON", "OFF"],
+      "ON": ["ON", "START", "OFF"],
+      "START": ["ON"]
+    }
+  }
+}

@@ -63,3 +63,9 @@ Each line is a JSON object:
 ```json
 {"session_id":"S-100","timestamp":"2026-07-13T12:00:00Z","vehicle_id":"VH-42","signal":"gear_state","value":"PARK"}
 ```
+
+## Known limitations
+
+- The REST API returns analysis results but does not yet persist records or anomalies to PostgreSQL.
+- The C++ validator intentionally supports flat telemetry JSON objects and rejects nested JSON values.
+- Signal ranges and transition rules are currently compiled into the application instead of loaded from external configuration.

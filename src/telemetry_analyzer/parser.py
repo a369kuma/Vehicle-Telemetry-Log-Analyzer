@@ -21,7 +21,8 @@ def parse_jsonl(lines: Iterable[str]) -> Iterator[TelemetryRecord]:
                 timestamp="",
                 vehicle_id="",
                 signal="",
-                value=f"invalid json: {exc.msg}",
+                value=None,
+                parse_error=f"invalid JSON: {exc.msg}",
             )
             continue
 

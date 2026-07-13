@@ -12,3 +12,4 @@ class TelemetryRecord:
     vehicle_id: str
     signal: str
     value: Any
+    parse_error: str | None = None

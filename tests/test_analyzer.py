@@ -33,7 +33,9 @@ class TelemetryAnalyzerTest(unittest.TestCase):
 
         self.assertEqual(summary.records_seen, 2)
         self.assertEqual(summary.valid_records, 0)
-        self.assertGreaterEqual(len(summary.validation_issues), 3)
+        self.assertEqual(len(summary.validation_issues), 3)
+        self.assertEqual(summary.validation_issues[-1].field, "record")
+        self.assertIn("invalid JSON", summary.validation_issues[-1].message)
         self.assertFalse(summary.anomalies)
 
 

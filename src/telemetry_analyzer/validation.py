@@ -14,6 +14,9 @@ class ValidationIssue:
 
 
 def validate_record(record: TelemetryRecord) -> list[ValidationIssue]:
+    if record.parse_error is not None:
+        return [ValidationIssue(record.line_number, "record", record.parse_error)]
+
     issues: list[ValidationIssue] = []
     required_fields = {
         "session_id": record.session_id,

@@ -19,8 +19,8 @@ transitions across repeated test sessions.
 ```bash
 python3 -m venv .venv
 source .venv/bin/activate
-pip install -e ".[dev]"
-pytest
+pip install -e .
+./scripts/run_checks.sh
 ```
 
 Analyze a log file:
